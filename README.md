@@ -10,7 +10,7 @@ Kenyan hospitals currently discover blood shortages only when stock has already 
 
 ## Live Dashboard
 
-[View on Streamlit Cloud] https://hemamatch-ml-qjxhr7rk2plfyhwatnpnp2.streamlit.app/
+[View Live Dashboard](https://hemamatch-ml-qjxhr7rk2plfyhwatnpnp2.streamlit.app/)
 
 
 ## Features
