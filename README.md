@@ -46,7 +46,7 @@ Real hospital blood bank data is protected under the Kenya Data Protection Act 2
 
 - Blood type prevalence from Kenya National Blood Transfusion Service (O+ approximately 40%, AB- approximately 1%)
 - Weekend and public holiday usage spikes driven by higher accident and trauma rates
-- Seasonal patterns - higher consumption during March–April long rains and November–December short rains
+- Seasonal patterns - higher consumption during March-April long rains and November–December short rains
 - Random emergency surge events simulating mass casualty incidents
 - Restocking cycles modelled on typical donation drive frequency
 
@@ -133,7 +133,7 @@ EARLY WARNING ALERTS — KNH — Next 7 Days
 
 ## Part of HemaMatch
 
-This module is an ML extension of [HemaMatch](https://github.com/elmbondo/Hema_match) — a full-stack blood donation and emergency matching system built with React.js, Node.js, and PostgreSQL for Kenyan hospitals.
+This module is an ML extension of [HemaMatch](https://github.com/elmbondo/Hema_match) - a full-stack blood donation and emergency matching system built with React.js, Node.js, and PostgreSQL for Kenyan hospitals.
 
 
 ## Author
