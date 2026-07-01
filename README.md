@@ -138,6 +138,6 @@ This module is an ML extension of [HemaMatch](https://github.com/elmbondo/Hema_m
 
 ## Author
 
-**Fidelmah Nthambi Mbondo**  
+**Fidelmah Mbondo**  
 BSc Mathematics and Computer Science, JKUAT  
 [GitHub](https://github.com/elmbondo)

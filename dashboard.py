@@ -1,7 +1,6 @@
 """
 HemaMatch - Blood Inventory Dashboard
 Visualises current stock levels + ARIMA forecasts.
-Red-themed to match the blood donation context.
 
 Usage:
     python dashboard.py
@@ -19,7 +18,7 @@ warnings.filterwarnings("ignore")
 from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-# ── CONFIG ───────────────────────────────────────────────────────────────────
+#  CONFIG 
 DATA_PATH          = "data/hemamatch_blood_inventory.csv"
 HOSPITAL           = "KNH"
 FORECAST_DAYS      = 7
@@ -30,7 +29,7 @@ HISTORY_PLOT_DAYS  = 45   # how many days of history to show on chart
 
 BLOOD_TYPES = ["O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"]
 
-# ── RED THEME PALETTE ────────────────────────────────────────────────────────
+#  RED THEME PALETTE 
 BG_DARK       = "#1A0000"   # near-black dark red background
 BG_PANEL      = "#2D0000"   # slightly lighter panel
 BG_CARD       = "#3D0505"   # card background
@@ -43,7 +42,7 @@ WHITE         = "#FFFFFF"
 GREY_LIGHT    = "#FFCCCC"   # soft red-white for labels
 THRESHOLD_CLR = "#FF4444"   # threshold dashed line
 
-# ── LOAD DATA ────────────────────────────────────────────────────────────────
+#  LOAD DATA 
 
 def load_data():
     df = pd.read_csv(DATA_PATH, parse_dates=["date"])
@@ -51,7 +50,7 @@ def load_data():
     df = df.sort_values("date")
     return df
 
-# ── ARIMA FORECAST ───────────────────────────────────────────────────────────
+#  ARIMA FORECAST 
 
 def forecast_blood_type(series):
     train = series[-TRAIN_DAYS:]
@@ -84,7 +83,7 @@ def forecast_blood_type(series):
         "history":             train,
     }
 
-# ── SUMMARY STATS ────────────────────────────────────────────────────────────
+#  SUMMARY STATS 
 
 def compute_summary(results):
     total_stock   = sum(r["current_stock"] for r in results.values())
@@ -93,7 +92,7 @@ def compute_summary(results):
     avg_mae        = np.mean([r["mae"] for r in results.values()])
     return total_stock, critical_count, ok_count, avg_mae
 
-# ── MAIN DASHBOARD ───────────────────────────────────────────────────────────
+#  MAIN DASHBOARD 
 
 def build_dashboard(df, results):
     last_date      = df["date"].max()
@@ -104,15 +103,14 @@ def build_dashboard(df, results):
 
     total_stock, critical_count, ok_count, avg_mae = compute_summary(results)
 
-    # ── Figure layout ──
+    #  Figure layout 
     fig = plt.figure(figsize=(20, 26), facecolor=BG_DARK)
     outer = gridspec.GridSpec(3, 1, figure=fig,
                               height_ratios=[0.12, 0.13, 0.75],
                               hspace=0.04)
 
-    # ════════════════════════════════════════════════════════
-    # SECTION 1 — HEADER
-    # ════════════════════════════════════════════════════════
+    # SECTION 1 - HEADER
+  
     ax_header = fig.add_subplot(outer[0])
     ax_header.set_facecolor(BG_DARK)
     ax_header.axis("off")
@@ -147,9 +145,8 @@ def build_dashboard(df, results):
     # Decorative bottom border
     ax_header.axhline(y=0, color=RED_MID, linewidth=2, xmin=0, xmax=1)
 
-    # ════════════════════════════════════════════════════════
-    # SECTION 2 — KPI CARDS
-    # ════════════════════════════════════════════════════════
+    # SECTION 2 - KPI CARDS
+
     ax_kpi = fig.add_subplot(outer[1])
     ax_kpi.set_facecolor(BG_DARK)
     ax_kpi.axis("off")
@@ -185,9 +182,8 @@ def build_dashboard(df, results):
                     fontsize=14, color=color,
                     ha="center", va="center", fontweight="bold")
 
-    # ════════════════════════════════════════════════════════
-    # SECTION 3 — FORECAST CHARTS (2 x 4 grid)
-    # ════════════════════════════════════════════════════════
+    # SECTION 3 - FORECAST CHARTS 
+
     inner = gridspec.GridSpecFromSubplotSpec(
         4, 2, subplot_spec=outer[2],
         hspace=0.52, wspace=0.28
@@ -209,19 +205,19 @@ def build_dashboard(df, results):
         # Trim history for display
         hist_display = history.iloc[-HISTORY_PLOT_DAYS:]
 
-        # ── History line ──
+        #  History line 
         ax.plot(hist_display.index, hist_display.values,
                 color=RED_SOFT, linewidth=1.6,
                 label="Historical stock", zorder=3)
 
-        # ── Forecast line ──
+        #  Forecast line 
         ax.plot(forecast_dates, forecast,
                 color=RED_BRIGHT if is_crit else GOLD,
                 linewidth=2.2, linestyle="--",
                 marker="o", markersize=5,
                 label="7-day forecast", zorder=4)
 
-        # ── Forecast uncertainty band (±MAE) ──
+        #  Forecast uncertainty band (±MAE) 
         ax.fill_between(forecast_dates,
                         np.maximum(forecast - r["mae"], 0),
                         forecast + r["mae"],
@@ -229,21 +225,21 @@ def build_dashboard(df, results):
                         color=RED_BRIGHT if is_crit else GOLD,
                         label=f"±MAE band")
 
-        # ── Critical threshold ──
+        #  Critical threshold 
         ax.axhline(y=CRITICAL_THRESHOLD,
                    color=THRESHOLD_CLR, linestyle=":",
                    linewidth=1.4, label=f"Critical ({CRITICAL_THRESHOLD}u)", zorder=2)
 
-        # ── Shade critical zone ──
+        #  Shade critical zone 
         ax.fill_between(forecast_dates, forecast, CRITICAL_THRESHOLD,
                         where=(forecast < CRITICAL_THRESHOLD),
                         alpha=0.35, color=RED_BRIGHT, zorder=1)
 
-        # ── Today line ──
+        #  Today line 
         ax.axvline(x=last_date, color="#888888",
                    linestyle="--", linewidth=0.9, alpha=0.7, zorder=2)
 
-        # ── Styling ──
+        #  Styling 
         status_txt = (f"⚠ CRITICAL in {r['days_until_critical']}d"
                       if is_crit else "✓ STABLE")
         status_clr = RED_BRIGHT if is_crit else GOLD
@@ -283,7 +279,7 @@ def build_dashboard(df, results):
                            facecolor=BG_DARK, edgecolor=RED_MID,
                            labelcolor=GREY_LIGHT)
 
-    # ── Footer ──
+    #  Footer 
     fig.text(0.5, 0.005,
              "HemaMatch  ·  ARIMA Blood Inventory Forecasting Module  ·  "
              "Synthetic data modelled on Kenya National Blood Transfusion Service patterns  ·  "
@@ -295,7 +291,7 @@ def build_dashboard(df, results):
     print(f"Dashboard saved → {out}")
     plt.close()
 
-# ── MAIN ─────────────────────────────────────────────────────────────────────
+#  MAIN 
 
 if __name__ == "__main__":
     print("Loading data...")

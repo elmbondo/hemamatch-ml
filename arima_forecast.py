@@ -17,17 +17,17 @@ warnings.filterwarnings("ignore")
 from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-# ── CONFIG ───────────────────────────────────────────────────────────────────
+# CONFIG
 DATA_PATH         = "data/hemamatch_blood_inventory.csv"
 HOSPITAL          = "KNH"          # change to MKS_L5 or MSA_PGH to switch hospital
 FORECAST_DAYS     = 7              # how many days ahead to forecast
-CRITICAL_THRESHOLD = 10            # units — alert if forecast dips below this
+CRITICAL_THRESHOLD = 10            # units; alert if forecast dips below this
 TRAIN_DAYS        = 60             # days of history used to train each model
-ARIMA_ORDER       = (2, 1, 2)      # (p, d, q) — works well for inventory data
+ARIMA_ORDER       = (2, 1, 2)      
 
 BLOOD_TYPES = ["O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"]
 
-# ── LOAD DATA ────────────────────────────────────────────────────────────────
+# LOAD DATA 
 
 def load_data(path, hospital):
     df = pd.read_csv(path, parse_dates=["date"])
@@ -36,7 +36,7 @@ def load_data(path, hospital):
     print(f"Loaded {len(df):,} rows for {hospital}")
     return df
 
-# ── TRAIN + FORECAST ─────────────────────────────────────────────────────────
+#  TRAIN + FORECAST
 
 def forecast_blood_type(series, blood_type):
     """
@@ -50,24 +50,24 @@ def forecast_blood_type(series, blood_type):
     train_data = train[:-FORECAST_DAYS]
     test_data  = train[-FORECAST_DAYS:]
 
-    # ── Train ARIMA ──
+    # Train ARIMA
     model = ARIMA(train_data.values, order=ARIMA_ORDER)
     fitted = model.fit()
 
-    # ── Evaluate on test set ──
+    # Evaluate on test set
     test_pred = fitted.forecast(steps=FORECAST_DAYS)
     test_pred = np.maximum(test_pred, 0)   # stock can't go negative
 
     mae  = mean_absolute_error(test_data.values, test_pred)
     rmse = np.sqrt(mean_squared_error(test_data.values, test_pred))
 
-    # ── Retrain on full TRAIN_DAYS, forecast future ──
+    # Retrain on full TRAIN_DAYS, forecast future
     model_full = ARIMA(train.values, order=ARIMA_ORDER)
     fitted_full = model_full.fit()
     forecast = fitted_full.forecast(steps=FORECAST_DAYS)
     forecast = np.maximum(forecast, 0)
 
-    # ── Alert logic ──
+    # Alert logic
     will_hit_critical = any(f < CRITICAL_THRESHOLD for f in forecast)
     days_until_critical = None
     for i, f in enumerate(forecast):
@@ -86,7 +86,7 @@ def forecast_blood_type(series, blood_type):
         "train_series":        train,
     }
 
-# ── RUN ALL BLOOD TYPES ───────────────────────────────────────────────────────
+# RUN ALL BLOOD TYPES 
 
 def run_forecasts(df):
     results = []
@@ -112,7 +112,7 @@ def run_forecasts(df):
 
     return results
 
-# ── PRINT ALERT SUMMARY ───────────────────────────────────────────────────────
+# PRINT ALERT SUMMARY
 
 def print_alerts(results):
     alerts = [r for r in results if r["will_hit_critical"]]
@@ -130,7 +130,7 @@ def print_alerts(results):
             )
     print()
 
-# ── VISUALISATION ─────────────────────────────────────────────────────────────
+# VISUALISATION
 
 def plot_forecasts(results, df):
     last_date = df["date"].max()
@@ -198,7 +198,7 @@ def plot_forecasts(results, df):
     print(f"Forecast chart saved → {out}")
     plt.close()
 
-# ── SAVE RESULTS TABLE ────────────────────────────────────────────────────────
+# SAVE RESULTS TABLE
 
 def save_results(results, last_date):
     forecast_dates = pd.date_range(
@@ -223,7 +223,7 @@ def save_results(results, last_date):
     print(f"Forecast results saved → hemamatch_forecast_results.csv")
     return out_df
 
-# ── MAIN ──────────────────────────────────────────────────────────────────────
+# MAIN
 
 if __name__ == "__main__":
     df = load_data(DATA_PATH, HOSPITAL)
